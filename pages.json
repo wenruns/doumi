@@ -1,0 +1,16 @@
+{
+	"pages": [{
+		"path": "pages/index/index",
+		"style": {
+			// "navigationStyle": "custom",
+			"titleNView":false,
+			"navigationBarTitleText": "wen-test"
+		}
+	}],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "wen",
+		"navigationBarBackgroundColor": "#007AFF",
+		"backgroundColor": "#FFFFFF"
+	}
+}
