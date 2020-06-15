@@ -1,6 +1,6 @@
 <template>
-	<view class="pc-head" :style="themes[theme]">
-		<uni-select :options="themeOptions"></uni-select>
+	<view class="pc-head" :style="themes[mainTheme]">
+		<uni-select :options="themeOptions" :defaultValue="mainTheme" @change="change" style=""></uni-select>
 	</view>
 </template>
 
@@ -14,14 +14,14 @@
 		props:{
 			theme:{
 				type: String,
-				default: "green"
+				default: "red"
 			},
 			themeOptions:{
 				type: Array,
 				default: ()=>{
 					return [
 						{
-							text: "green12312312312",
+							text: "绿色的爱丽丝",
 							value: {
 								value: "green",
 								style: {
@@ -29,7 +29,7 @@
 								}
 							}
 						},{
-							text: "blue",
+							text: "蓝色的天团",
 							value: {
 								value: "blue",
 								style: {
@@ -37,7 +37,7 @@
 								}
 							}
 						},{
-							text: "red",
+							text: "红色的玫瑰",
 							value: {
 								value: "red",
 								style: {
@@ -48,40 +48,29 @@
 					];
 				},
 			},
-			themes:{
-				type: Object,
-				default:()=>{
-					return {
-						green: {
-							background: "green",
-						},
-						blue: {
-							background: "blue",
-						},
-						"sky-blue": {
-							background: "sky-blue",
-						},
-						red: {
-							background: "red",
-						}
-					};
-				}
-			}
-		},
-		methods:{
-			change(){
-				console.log(this.$refs.themeObj.value);
-				this.$props.theme = this.$refs.themeObj.value
-			}
-		},
-		created: () => {
-			
 		},
 		data() {
 			return {
-				
+				mainTheme: '',
+				themes: {},
 			};
-		}
+		},
+		created() {
+			this.mainTheme = this.$props.theme;
+			this.themeOptions.forEach((item, index)=>{
+				if(typeof item.value == 'object'){
+					this.themes[item.value.value] = item.value.style
+				}else{
+					this.themes[item.value] = {};
+				}
+			})
+		},
+		methods:{
+			change(data){
+				this.mainTheme = data.value
+			},
+		},
+		
 	}
 </script>
 

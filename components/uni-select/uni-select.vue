@@ -1,13 +1,19 @@
 <template>
 	<view class="uni-select">
-		<view class="uni-select-content" :style="style">
-			<view class="uni-select-value" v-html="text"></view>
-			<view class="uni-select-icon"></view>
+		<view class="uni-select-content" :style="subStyle" @click="clickSelect">
+			<view class="uni-select-value" :style="selectStyle" v-html="subText"></view>
+			<view class="uni-select-icon" :style="iconStyle"></view>
 		</view>
-		<view class="uni-select-options">
+		<view class="uni-select-options" v-show="showOptions">
 			<template v-for="(item,index) in options">
-				<view class="uni-select-option"  :key="index" v-if="isObject(item.value, index)" :style="checkStyle(item.value)" v-html="item.text" @click="choose(item, index)">1</view>
-				<view class="uni-select-option"  :key="index" v-else v-html="item.text" @click="choose(item, index)">2</view>
+				<view class="uni-select-option" :id="item.value.value" v-if="isObject(item, index)" @click="choose(item, index)" :key="index" >
+					<view class="uni-select-option-content" :style="checkStyle(item.value)" v-html="item.text"></view>
+					<view v-show="hadChoice(item, index)" class="had-choice-option"></view>
+				</view>
+				<view class="uni-select-option" :id="item.value" v-else @click="choose(item, index)" :key="index" >
+					<view class="uni-select-option-content" v-html="item.text"></view>
+					<view v-show="hadChoice(item, index)" class="had-choice-option"></view>
+				</view>
 			</template>
 		</view>
 	</view>
@@ -17,13 +23,9 @@
 	export default {
 		name:"UniSelect",
 		props:{
-			value:{
+			defaultValue: {
 				type: String,
 				default: '',
-			},
-			text:{
-				type: String,
-				default:'<span style="color: gray;">请选择</span>'
 			},
 			options:{
 				type: Array,
@@ -41,39 +43,114 @@
 						}
 					];
 				}
-			}
+			},
 		},
 		data(){
 			return {
-				style: {}
+				// 下拉框默认样式
+				subStyle: {},
+				subValue: '',
+				subText: '<span style="color: gray;">请选择</span>',
+				// 显示选项
+				showOptions: true,
+				// 下拉框的初始宽度
+				maxW: 0,
+				selectStyle: {'min-width': '0px'},
+				// 判断是否为初次执行
+				firstTime: true,
+				iconStyle: {"border-top": "10px solid gray"},
 			}
 		},
 		created(){
-			console.log(this.$props.options);
+			// 默认值
+			this.subValue = this.defaultValue
 		},
 		methods:{
+			// 判断value是否为对象，
 			isObject(item, index){
-				if(typeof item == 'object'){
-					return true;
-				}
-				return false;
-			},
-			choose(item, index){
-				console.log(item, index);
-				this.text = item.text;
-				if(this.isObject(item.value, index)){
-					this.value = item.value.value;
-					this.style = item.value.style;
+				var isobj = false;
+				var id = '';
+				var style = {};
+				if(typeof item.value == 'object'){
+					isobj = true;
+					id = item.value.value;
+					style = item.value.style;
 				}else{
-					this.value = item.value;
+					id = item.value;
 				}
+				
+				if(id == this.subValue){
+					this.subStyle = style;
+					this.subText = item.text;
+				}
+				
+				this.$nextTick(function(){
+					uni.createSelectorQuery().in(this).select('#'+id).boundingClientRect(data => {
+					    if(data.width > this.maxW && this.firstTime){
+							this.maxW = data.width;
+							this.selectStyle['min-width'] = (this.maxW - 10) + 'px';
+						}
+					}).exec();
+					
+					if(index == (this.options.length-1) && this.firstTime){
+						this.showOptions = false;
+						this.firstTime  = false;
+					}
+				})
+				
+				return isobj;
 			},
+			// 选择事件
+			choose(item, index){
+				var value = '';
+				if(this.isObject(item, index)){
+					value = item.value.value;
+					this.subStyle = item.value.style;
+				}else{
+					value = item.value;
+				}
+				if(this.subValue != value){
+					this.$emit('change', {value: value, data: item, index: index})
+				}
+				this.subValue = value;
+				this.subText = item.text;
+				this.showOptions = !this.showOptions;
+				this.changeIconStatus();
+			},
+			// 检测style
 			checkStyle(item){
 				if(item.style){
 					return item.style;
 				}
 				return {};
-			}
+			},
+			// 点击事件
+			clickSelect(){
+				this.showOptions = !this.showOptions;
+				this.changeIconStatus();
+				this.$emit('click',{value: this.subValue, text: this.subText, style: this.subStyle})
+			},
+			// 判断是否选中
+			hadChoice(item, index){
+				var value = '';
+				if(this.isObject(item, index)){
+					value = item.value.value;
+				}else{
+					value = item.value;
+				}
+				if(this.subValue == value){
+					return true;
+				}
+				return false;
+			},
+			// 选择框icon变化方法
+			changeIconStatus(){
+				if(this.showOptions){
+					this.iconStyle= {"border-bottom": "10px solid gray"};
+				}else{
+					this.iconStyle= {"border-top": "10px solid gray"};
+				}
+			},
 		}
 	}
 </script>
@@ -82,12 +159,11 @@
 	.uni-select{
 		display: inline-block;
 		position: relative;
-		/* border: 1px solid red; */
+		border: 1px solid #CCCCCC;
 	}
 	.uni-select>.uni-select-content{
 		cursor: pointer;
 		background-color: white;
-		border: 1px solid pink;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -101,19 +177,32 @@
 		height: 0;
 		border-left: 5px solid transparent;
 		border-right: 5px solid transparent;
-		border-top: 10px solid gray;
 	}
 	.uni-select>.uni-select-options{
-		position: relative;
-		left: 0px;
-		top: calc(100% + 1px);
-		min-width: calc(100% - 2px);
+		position: absolute;
+		left: -1px;
+		top: 100%;
+		min-width: 100%;
 		background-color: red;
 		border: 1px solid pink;
 	}
 	.uni-select>.uni-select-options>.uni-select-option{
 		border-bottom: 1px solid gray;
 		background: white;
-		padding: 0px 10px;
+		cursor: pointer;
+		position: relative;
+	}
+	.uni-select>.uni-select-options>.uni-select-option>.uni-select-option-content{
+		padding: 0px 5px;
+	}
+	.uni-select>.uni-select-options>.uni-select-option>.had-choice-option{
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		width: 100%;
+		height: 100%;
+		background: black;
+		opacity: 0.5;
+		filter: opacity(5);
 	}
 </style>
