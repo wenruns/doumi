@@ -9,7 +9,6 @@
 
 <script>
 	import pcHeader from '@/components/pc-header/pc-header.vue';
-	
 	export default {
 		components:{
 			pcHeader,
@@ -25,6 +24,9 @@
 			open(){
 				this.$refs.popup.open();
 			}
+		},
+		created() {
+			
 		}
 	}
 </script>

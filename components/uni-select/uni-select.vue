@@ -2,16 +2,16 @@
 	<view class="uni-select">
 		<view class="uni-select-content" :style="subStyle" @click="clickSelect">
 			<view class="uni-select-value" :style="selectStyle" v-html="subText"></view>
-			<view class="uni-select-icon" :style="iconStyle"></view>
+			<view class="uni-select-icon" :style="iconStyle" v-show="iconShow"></view>
 		</view>
-		<view class="uni-select-options" v-show="showOptions">
+		<view class="uni-select-options" :style="optionStyle" v-show="showOptions">
 			<template v-for="(item,index) in options">
 				<view class="uni-select-option" :id="item.value.value" v-if="isObject(item, index)" @click="choose(item, index)" :key="index" >
-					<view class="uni-select-option-content" :style="checkStyle(item.value)" v-html="item.text"></view>
+					<view class="uni-select-option-content" :style="checkStyle(item.value)" v-html="item.text"> </view>
 					<view v-show="hadChoice(item, index)" class="had-choice-option"></view>
 				</view>
 				<view class="uni-select-option" :id="item.value" v-else @click="choose(item, index)" :key="index" >
-					<view class="uni-select-option-content" v-html="item.text"></view>
+					<view class="uni-select-option-content" v-html="item.text"> </view>
 					<view v-show="hadChoice(item, index)" class="had-choice-option"></view>
 				</view>
 			</template>
@@ -23,6 +23,10 @@
 	export default {
 		name:"UniSelect",
 		props:{
+			iconShow: {
+				type:Boolean,
+				default: true,
+			},
 			defaultValue: {
 				type: String,
 				default: '',
@@ -59,6 +63,7 @@
 				// 判断是否为初次执行
 				firstTime: true,
 				iconStyle: {"border-top": "10px solid gray"},
+				optionStyle: {position: 'relative'},
 			}
 		},
 		created(){
@@ -83,18 +88,17 @@
 					this.subStyle = style;
 					this.subText = item.text;
 				}
-				
 				this.$nextTick(function(){
 					uni.createSelectorQuery().in(this).select('#'+id).boundingClientRect(data => {
 					    if(data.width > this.maxW && this.firstTime){
 							this.maxW = data.width;
-							this.selectStyle['min-width'] = (this.maxW - 10) + 'px';
+							this.selectStyle['min-width'] = (this.maxW) + 'px';
 						}
 					}).exec();
-					
 					if(index == (this.options.length-1) && this.firstTime){
-						this.showOptions = false;
 						this.firstTime  = false;
+						this.showOptions = false;
+						this.optionStyle = {position: 'absolute'};
 					}
 				})
 				
@@ -120,6 +124,7 @@
 			// 检测style
 			checkStyle(item){
 				if(item.style){
+					
 					return item.style;
 				}
 				return {};
@@ -168,6 +173,7 @@
 		align-items: center;
 		justify-content: space-between;
 		padding: 0px 5px;
+		min-height: 20px;
 	}
 	.uni-select>.uni-select-content>.uni-select-value{
 		padding-right: 5px;
@@ -179,10 +185,9 @@
 		border-right: 5px solid transparent;
 	}
 	.uni-select>.uni-select-options{
-		position: absolute;
 		left: -1px;
-		top: 100%;
-		min-width: 100%;
+		top: calc(100% + 1px);
+		min-width: calc(100% + 2px);
 		background-color: red;
 		border: 1px solid pink;
 	}
@@ -191,9 +196,11 @@
 		background: white;
 		cursor: pointer;
 		position: relative;
+		min-height: 20px;
 	}
 	.uni-select>.uni-select-options>.uni-select-option>.uni-select-option-content{
 		padding: 0px 5px;
+		min-height: 20px;
 	}
 	.uni-select>.uni-select-options>.uni-select-option>.had-choice-option{
 		position: absolute;
