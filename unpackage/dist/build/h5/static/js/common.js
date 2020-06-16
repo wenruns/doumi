@@ -60,6 +60,7 @@ function CommonObject(){
 	 */
 	this.setCustomSetting= (index, value) => {
 		try{
+			console.log(index+'='+value)
 			var customSetting = this.getStorage('customer_setting', {});
 			customSetting[index] = value;
 			this.setStorage('customer_setting', customSetting);

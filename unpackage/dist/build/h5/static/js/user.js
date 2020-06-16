@@ -6,7 +6,7 @@ function UserObject(){
 	 * 检测是否拥有权限
 	 * @param {Object} authFlag
 	 */
-	this.hasAuth = (authFlag)=>{
+	this.checkAuth = (authFlag)=>{
 		var auth = this.getUserInfo('auth');
 		if(auth){
 			if(auth.indexOf(authFlag) >= 0){
@@ -20,7 +20,7 @@ function UserObject(){
 	/**
 	 * 检测是否已登录
 	 */
-	this.isLogin = ()=>{
+	this.checkLogin = ()=>{
 		if(this.getUserInfo()){
 			return true;
 		}
@@ -38,12 +38,12 @@ function UserObject(){
 		return userInfo;
 	}
 	
-	this.login = (data, callback = null)=>{
+	this.login = (data)=>{
 		internet.sendData({
 			data: data,
 			flag: "login",
 			callback: function(rst){
-				callback && callback(rst);
+				console.log(rst);
 			}
 		})
 	}

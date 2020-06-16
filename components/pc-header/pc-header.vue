@@ -11,7 +11,7 @@
 
 <script>
 	import aSelect from '@/components/uni-select/uni-select.vue'; 
-	import {getStorage,getCustomSetting,setCustomSetting} from '@/static/js/common.js';
+	import { common } from '@/static/js/common.js';
 	export default {
 		components:{
 			aSelect,
@@ -26,9 +26,9 @@
 			};
 		},
 		created() {
-			var customConfigs = getStorage('custom_config');
-			var customSetting = getCustomSetting();
-			this.mainTheme = customSetting.theme ? customSetting.theme : customConfigs.defaultTheme;
+			var customConfigs = common.getStorage('custom_config');
+			var customSetting = common.getCustomSetting();
+			this.mainTheme = customSetting && customSetting.theme ? customSetting.theme : customConfigs.defaultTheme;
 			this.themeOptions = customConfigs.themes;
 			this.themeOptions.forEach((item, index)=>{
 				if(typeof item.value == 'object'){
@@ -41,7 +41,7 @@
 		methods:{
 			change(data){
 				this.mainTheme = data.value
-				setCustomSetting('theme', data.value);
+				common.setCustomSetting('theme', data.value);
 			},
 			test(){
 				uni.getLocation({

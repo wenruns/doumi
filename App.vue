@@ -3,12 +3,21 @@
 	@import "uview-ui/index.scss";
 </style>
 <script>
-	import { getCustomConfig, setStorage } from '@/static/js/common.js';
+	import { common } from '@/static/js/common.js';
+	import { user } from '@/static/js/user.js';
+	
 	export default {
 		onLaunch: function() {
-			getCustomConfig(function(rst){
+			common.getCustomConfig(function(rst){
 				if(rst.statusCode == 200){
-					setStorage('custom_config', rst.data)
+					common.setStorage('custom_config', rst.data)
+					user.login({
+						username: '',
+						password: '',
+						verifyCode: '',
+					}, function(rst){
+						console.log(rst);
+					});
 				}else{
 					console.warn(rst)
 				}
@@ -16,6 +25,7 @@
 		},
 		onShow: function() {
 			// console.log('App Show');
+			
 		},
 		onHide: function() {
 			// console.log('App Hide');

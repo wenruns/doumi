@@ -71,7 +71,16 @@
     "h5" : {
         "uniStatistics" : {
             "enable" : true
-        }
+        },
+        "sdkConfigs" : {
+            "maps" : {}
+        },
+        "optimization" : {
+            "treeShaking" : {
+                "enable" : false
+            }
+        },
+        "domain" : "test-html.com"
     },
     "mp-alipay" : {
         "uniStatistics" : {

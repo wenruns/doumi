@@ -1,11 +1,5 @@
 {
 	"connectType": "http",
-	"websocket": {
-		"url": "",
-		"header": {},
-		"method": "GET",
-		"protocols": []
-	},
 	"apis":{
 		"login": {
 			"url":"http://test-html.com",
