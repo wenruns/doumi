@@ -8,6 +8,12 @@
 				"navigationBarTitleText": "wen-test"
 			}
 		}
+        ,{
+            "path" : "pages/login/login",
+            "style" : {
+				"titleNView":false
+			}
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "white",

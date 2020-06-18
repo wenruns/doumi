@@ -4,20 +4,12 @@
 </style>
 <script>
 	import { common } from '@/static/js/common.js';
-	import { user } from '@/static/js/user.js';
 	
 	export default {
 		onLaunch: function() {
 			common.getCustomConfig(function(rst){
 				if(rst.statusCode == 200){
 					common.setStorage('custom_config', rst.data)
-					user.login({
-						username: '',
-						password: '',
-						verifyCode: '',
-					}, function(rst){
-						console.log(rst);
-					});
 				}else{
 					console.warn(rst)
 				}
@@ -25,7 +17,6 @@
 		},
 		onShow: function() {
 			// console.log('App Show');
-			
 		},
 		onHide: function() {
 			// console.log('App Hide');

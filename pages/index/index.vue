@@ -9,6 +9,8 @@
 
 <script>
 	import pcHeader from '@/components/pc-header/pc-header.vue';
+	import { user } from '@/static/js/user.js';
+	
 	export default {
 		components:{
 			pcHeader,
@@ -26,7 +28,15 @@
 			}
 		},
 		created() {
-			
+			console.log('create')
+		},
+		onShow() {
+			console.log('show')
+			if(!user.isLogin()){
+				uni.navigateTo({
+					url:"/pages/login/login",
+				})
+			}
 		}
 	}
 </script>

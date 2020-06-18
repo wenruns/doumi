@@ -10,13 +10,13 @@
 </template>
 
 <script>
-	import aSelect from '@/components/uni-select/uni-select.vue'; 
+	import aSelect from '@/components/wen-select/wen-select.vue'; 
 	import { common } from '@/static/js/common.js';
 	export default {
+		name: "PcHeader",
 		components:{
 			aSelect,
 		},
-		name: "PcHeader",
 		props:{},
 		data() {
 			return {
