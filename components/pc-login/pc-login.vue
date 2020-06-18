@@ -1,14 +1,24 @@
 <template>
 	<view class="login-box">
-		<canvas canvas-id="test-id" class="canvas-box" type="webgl" :disable-scroll="false" @mousedown="touchStartEvent" @mousemove="touchMoveEvent" @mouseup="touchEndEvent"></canvas>
+		<!-- <canvas canvas-id="test-id" class="canvas-box" type="webgl" :disable-scroll="false" @mousedown="touchStartEvent" @mousemove="touchMoveEvent" @mouseup="touchEndEvent"></canvas>
+		<view class="history-box">
+			<view class="history-img" v-for="(src, index) in history" :key="index" @click="rollback(src, index)">
+				<img :src="src" alt="">
+			</view>
+		</view> -->
+		<wen-canvas></wen-canvas>
 	</view>
 </template>
 
 <script>
+	import wenCanvas from '@/components/wen-canvas/wen-canvas.vue';
 	export default {
 		name: "PcLogin",
 		props:{
 			
+		},
+		components:{
+			wenCanvas,
 		},
 		data() {
 			return {
@@ -21,26 +31,40 @@
 				cancel: false,
 				canvasContent: null,
 				lineWidth: 1,
+				history: [],
+				index: 0,
 			};
 		},
 		methods:{
+			init(){
+				// 初始化数据
+				this.lognTap = false;
+				this.hadDown = false;
+				this.hadMove = false;
+				this.startPos = {x: null, y: null};
+				this.cancel = false;
+				this.error = false;
+				this.previosPos = {x: null, y: null};
+				this.lineWidth = 0;
+			},
 			touchStartEvent(e){
 				console.log('touchstart')
 				try{
 					this.hadDown = true;
-					this.previosPos = this.startPos = this.getMousePos();
-					if(!this.canvasContent){
-						this.canvasContent = uni.createCanvasContext('test-id', this)
-						// this.canvasContent.setLineWidth(1);
-					}
-					// this.makeBroken();
 					var h = setTimeout(()=>{
 						if(!this.hadMove && this.hadDown && !this.cancel){
 							this.lognTap = true;
 							this.longTapEvent(e);
 						}
 						clearTimeout(h);
-					}, 3000)
+					}, 3000);
+					
+					this.history.splice(0, this.index)
+					this.index = 0;
+					this.previosPos = this.startPos = this.getMousePos();
+					
+					
+					// this.makeBroken();
 				}catch(err){
 					this.error = true;
 					this.errorEvent(e, err, 'start');
@@ -64,23 +88,6 @@
 					this.canvasContent.stroke();
 					this.canvasContent.draw(true);
 					this.canvasContent.restore();
-					
-					// var w = Math.abs(pos.x - this.previosPos.x);
-					// var h = Math.abs(pos.y - this.previosPos.y);
-					// var data = uni.canvasGetImageData({
-					// 	canvasId:'test-id',
-					// 	x: this.previosPos.x,
-					// 	y: this.previosPos.y,
-					// 	width: w,
-					// 	height: h,
-					// 	success(rst) {
-					// 		console.log(rst)
-					// 	},
-					// 	fail(err) {
-					// 		console.log(err)
-					// 	}
-					// })
-					// console.log('data', data)
 					this.previosPos = pos;
 					this.makeBroken();
 					this.lineWidth+=0.01;
@@ -92,26 +99,20 @@
 			touchEndEvent(e){
 				try{
 					var pos = this.getMousePos();
-					
-					console.log('touchend',pos)
-					var x = this.startPos.x;
-					var y = this.startPos.y;
-					var h = setTimeout(()=>{
-						clearTimeout(h);
-						// this.canvasContent.draw();
-						console.log('clear.....')
-						this.canvasContent.clearRect(x-100, y-250 , 500, 500);
-						this.canvasContent.draw(true);
-					}, 1000)
-					// 初始化数据
-					this.lognTap = false;
-					this.hadDown = false;
-					this.hadMove = false;
-					this.startPos = {x: null, y: null};
-					this.cancel = false;
-					this.error = false;
-					this.previosPos = {x: null, y: null};
-					this.lineWidth = 0;
+					var hadMove =this.hadDown;
+					this.init();
+					uni.canvasToTempFilePath({
+						canvasId:'test-id',
+						success:(rst) => {
+							if(hadMove){
+								console.log('success', rst)
+								this.history.unshift(rst.tempFilePath)
+							}
+						},
+						fail:(err) => {
+							console.log('fail', err)
+						}
+					}, this)
 				}catch(err){
 					this.error = true;
 					this.errorEvent(e, err, 'end');
@@ -235,10 +236,34 @@
 					x: x,
 					y: y
 				};
+			},
+			rollback(img, index){
+				// console.log('rollback',img, index)
+				var canvasObj = document.querySelector('.canvas-box');
+				this.canvasContent.clearRect(0, 0, canvasObj.clientWidth, canvasObj.clientHeight);
+				this.canvasContent.drawImage(img, 0, 0, canvasObj.clientWidth, canvasObj.clientHeight)
+				this.canvasContent.draw();
+				this.index = index;
 			}
 		},
 		created() {
 			console.log('created')
+			// if(!this.canvasContent){
+			// 	this.canvasContent = uni.createCanvasContext('test-id', this)
+			// 	// this.canvasContent.setLineWidth(1);
+			// }
+			// this.$nextTick(function(){
+			// 	uni.canvasToTempFilePath({
+			// 		canvasId:'test-id',
+			// 		success: (rst) => {
+			// 			console.log(rst)
+			// 			this.history.unshift(rst.tempFilePath)
+			// 		},
+			// 		fail: (err) => {
+			// 			console.log(err)
+			// 		}
+			// 	}, this)
+			// })
 		},
 		onHide() {
 			console.log('onHide')
@@ -269,5 +294,21 @@
 		border: 1px solid red;
 		width: calc(100% - 2px);
 		height: calc(100% - 2px);
+	}
+	.history-box{
+		position: fixed;
+		top: 5px;
+		left: 5px;
+		width: 150px;
+		height: calc(100% - 10px);
+		border: 1px solid green;
+		overflow-y: auto;
+	}
+	.history-box>.history-img{
+		width: 100%;
+		border: 1px solid yellow;
+	}
+	.history-box>.history-img>img{
+		width: 100%;
 	}
 </style>
